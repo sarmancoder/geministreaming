@@ -1,10 +1,17 @@
 "use client";
 
 import { promptDB } from "@/actions/propmt";
-import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Form } from "@base-ui/react";
+import { Button } from "./ui/button";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "./ui/card";
 
 export function PromptForm() {
     return (
@@ -19,15 +26,25 @@ export function PromptForm() {
                 await promptDB();
             }}
         >
-            <FieldGroup>
-                <Field>
-                    <FieldLabel htmlFor="fieldgroup-name">Name</FieldLabel>
-                    <Input name="prompt" />
-                </Field>
-                <Field orientation="horizontal">
-                    <Button type="submit">Submit</Button>
-                </Field>
-            </FieldGroup>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Consultar a la IA</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Field>
+                        <FieldLabel htmlFor="fieldgroup-name">Name</FieldLabel>
+                        <Input name="prompt" />
+                    </Field>
+                </CardContent>
+                <CardFooter>
+                    <Field
+                        orientation="horizontal"
+                        className="flex justify-end"
+                    >
+                        <Button type="submit">Submit</Button>
+                    </Field>
+                </CardFooter>
+            </Card>
         </Form>
     );
 }

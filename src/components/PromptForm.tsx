@@ -1,6 +1,6 @@
 "use client";
 
-import { promptDB } from "@/actions/propmt";
+import { promptDB } from "@/actions/prompt";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Form } from "@base-ui/react";
@@ -23,7 +23,9 @@ export function PromptForm() {
                 const data = Object.fromEntries(formData.entries());
 
                 console.log(data);
-                await promptDB();
+                await promptDB(
+                    "Cuales son las peliculas mas adquiridas en la primera semana del mes de julio de 2005",
+                );
             }}
         >
             <Card>

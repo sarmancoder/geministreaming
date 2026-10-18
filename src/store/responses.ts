@@ -20,11 +20,14 @@ export const responseSlice = createSlice({
         setResponse(state, action: PayloadAction<string>) {
             state.response = action.payload;
         },
+        addToResponse(state, action: PayloadAction<string>) {
+            state.response += action.payload;
+        },
     },
 });
 
 // Action creators are generated for each case reducer function
-export const { setResponse } = responseSlice.actions;
+export const { setResponse, addToResponse } = responseSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectResponse = (state: RootState) => state.responses.response;

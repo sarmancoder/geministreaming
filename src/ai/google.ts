@@ -4,6 +4,7 @@ import {
     GoogleGenAI,
     FunctionCallingConfigMode,
     FunctionDeclaration,
+    GenerateContentParameters,
 } from "@google/genai";
 
 const GEMINI_API_KEY = envData.GEMINI_API_KEY;
@@ -36,7 +37,10 @@ async function getFilms(args: any) {
 
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
-export default async function getAnalyticsFor(userPrompt: string) {
+export default async function getAnalyticsFor(
+    userPrompt: string,
+    stream = false,
+) {
     console.log("getanalytics");
     const modelToUse = "gemini-3.5-flash-lite"; // Asegúrate de usar un modelo compatible con tools
 
@@ -62,8 +66,6 @@ export default async function getAnalyticsFor(userPrompt: string) {
         return;
     }
 
-    console.log("calls", calls);
-
     const call = calls[0];
 
     // Early Return 2: Si la función recibida no es la esperada, salimos
@@ -78,10 +80,9 @@ export default async function getAnalyticsFor(userPrompt: string) {
         call.args,
     );
 
-    const args = call.args as { fechaInicio: string; fechaFinal: string };
+    const parameters = call.args as { fechaInicio: string; fechaFinal: string };
     console.log("Obteniendo peliculas");
-    const functionResult = await getFilms(args);
-    console.log("resultado", { functionResult });
+    const functionResult = await getFilms(parameters);
 
     // SOLUCIÓN: Usamos el contenido exacto devuelto por el modelo (que incluye la firma interna)
     // El SDK almacena el bloque de contenido del modelo en `response.functionCalls` o podemos extraerlo de los candidatos.
@@ -91,8 +92,7 @@ export default async function getAnalyticsFor(userPrompt: string) {
         parts: [{ functionCall: call }],
     };
 
-    // Enviamos el resultado de vuelta a Gemini para obtener la respuesta final
-    const finalResponse = await ai.models.generateContent({
+    const parametersAi: GenerateContentParameters = {
         model: modelToUse,
         contents: [
             {
@@ -117,7 +117,15 @@ export default async function getAnalyticsFor(userPrompt: string) {
         config: {
             tools: [{ functionDeclarations: [getFilmsDeclaration] }],
         },
-    });
+    };
+
+    if (stream) {
+        const res = await ai.models.generateContentStream(parametersAi);
+        return res;
+    }
+
+    // Enviamos el resultado de vuelta a Gemini para obtener la respuesta final
+    const finalResponse = await ai.models.generateContent(parametersAi);
 
     return finalResponse.text;
 }

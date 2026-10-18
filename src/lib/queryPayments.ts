@@ -12,7 +12,6 @@ JOIN film f ON f.film_id = i.film_id
 WHERE p.payment_date BETWEEN '${firstDate}' AND '${secondDate}'
 ORDER BY p.payment_date desc
 `;
-    console.log(querySTR);
     const query = await dbConnection.query(querySTR);
 
     return query;

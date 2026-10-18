@@ -13,7 +13,7 @@ import {
     CardTitle,
 } from "./ui/card";
 import { useAppDispatch } from "@/store/hooks";
-import { setResponse } from "@/store/responses";
+import { addToResponse, setResponse } from "@/store/responses";
 
 const testPrompt =
     "Cuales son las peliculas mas adquiridas en la primera semana del mes de julio de 2005";
@@ -42,6 +42,28 @@ export function PromptForm() {
 
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                console.dir(response);
+
+                if (response.body instanceof ReadableStream) {
+                    dispatch(setResponse(""));
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    while (true) {
+                        const { value, done } = await reader.read();
+
+                        if (done) break;
+
+                        // Decodificamos el chunk recibido y lo añadimos al estado
+                        const chunkText = decoder.decode(value, {
+                            stream: true,
+                        });
+                        console.log(chunkText);
+                        dispatch(addToResponse(chunkText));
+                    }
+
+                    return;
                 }
 
                 const dataResponse = await response.json();

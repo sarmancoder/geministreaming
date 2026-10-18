@@ -6,7 +6,6 @@ import MarkdownPreview from "@uiw/react-markdown-preview";
 
 type ResponsesType = {};
 
-// biome-ignore lint/correctness/noEmptyPattern: <explanation>
 export default function Responses({}: ResponsesType) {
     const response = useAppSelector(selectResponse);
     return (

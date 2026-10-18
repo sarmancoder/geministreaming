@@ -14,12 +14,14 @@ import {
 } from "./ui/card";
 import { useAppDispatch } from "@/store/hooks";
 import { addToResponse, setResponse } from "@/store/responses";
+import { useState } from "react";
 
 const testPrompt =
     "Cuales son las peliculas mas adquiridas en la primera semana del mes de julio de 2005";
 
 export function PromptForm() {
     const dispatch = useAppDispatch();
+    const [unable, setUnable] = useState(false);
     return (
         <Form
             onSubmit={async (ev) => {
@@ -29,51 +31,65 @@ export function PromptForm() {
                 const data = Object.fromEntries<any>(formData.entries());
 
                 console.log(data);
+                setUnable(true);
                 // const response = await promptDB(data.prompt);
 
-                const response = await fetch("/api/prompt", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        // 'Authorization': 'Bearer token'
-                    },
-                    body: JSON.stringify({ prompt: data.prompt }),
-                });
+                try {
+                    dispatch(setResponse(" > La ia está trabajando..."));
+                    const response = await fetch("/api/prompt", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            // 'Authorization': 'Bearer token'
+                        },
+                        body: JSON.stringify({ prompt: data.prompt }),
+                    });
 
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
-                }
-
-                console.dir(response);
-
-                if (response.body instanceof ReadableStream) {
-                    dispatch(setResponse(""));
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder();
-                    while (true) {
-                        const { value, done } = await reader.read();
-
-                        if (done) break;
-
-                        // Decodificamos el chunk recibido y lo añadimos al estado
-                        const chunkText = decoder.decode(value, {
-                            stream: true,
-                        });
-                        console.log(chunkText);
-                        dispatch(addToResponse(chunkText));
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
                     }
 
-                    return;
+                    console.dir(response);
+
+                    if (response.body instanceof ReadableStream) {
+                        dispatch(setResponse(""));
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder();
+                        while (true) {
+                            const { value, done } = await reader.read();
+
+                            if (done) {
+                                console.log("done", done);
+                                break;
+                            }
+
+                            // Decodificamos el chunk recibido y lo añadimos al estado
+                            const chunkText = decoder.decode(value, {
+                                stream: true,
+                            });
+                            console.log(chunkText);
+                            dispatch(addToResponse(chunkText));
+                        }
+                        setUnable(false);
+
+                        return;
+                    }
+
+                    const dataResponse = await response.json();
+                    console.log("data:", dataResponse);
+
+                    dispatch(
+                        setResponse(
+                            dataResponse.data ?? "No se ha obtenido respuesta",
+                        ),
+                    );
+                } catch (error) {
+                    console.log(error);
+                    dispatch(setResponse(" > Hubo un error"));
+                } finally {
+                    console.log("finally");
+                    setUnable(false);
                 }
-
-                const dataResponse = await response.json();
-                console.log("data:", dataResponse);
-
-                dispatch(
-                    setResponse(
-                        dataResponse.data ?? "No se ha obtenido respuesta",
-                    ),
-                );
             }}
         >
             <Card>
@@ -83,7 +99,11 @@ export function PromptForm() {
                 <CardContent>
                     <Field>
                         <FieldLabel htmlFor="fieldgroup-name">Name</FieldLabel>
-                        <Input name="prompt" defaultValue={testPrompt} />
+                        <Input
+                            name="prompt"
+                            disabled={unable}
+                            defaultValue={testPrompt}
+                        />
                     </Field>
                 </CardContent>
                 <CardFooter>
@@ -91,7 +111,9 @@ export function PromptForm() {
                         orientation="horizontal"
                         className="flex justify-end"
                     >
-                        <Button type="submit">Submit</Button>
+                        <Button type="submit" disabled={unable}>
+                            Submit
+                        </Button>
                     </Field>
                 </CardFooter>
             </Card>

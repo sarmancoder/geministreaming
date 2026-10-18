@@ -96,6 +96,14 @@ export default async function getAnalyticsFor(
         model: modelToUse,
         contents: [
             {
+                role: "model",
+                parts: [
+                    {
+                        text: "Quiero que me respondas en formato markdown, siempre empieza la respuesta por un titulo h1 #, quiero respuestas bonitas",
+                    },
+                ],
+            },
+            {
                 role: "user",
                 parts: [{ text: userPrompt }],
             },

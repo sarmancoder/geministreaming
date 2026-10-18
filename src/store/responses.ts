@@ -9,7 +9,7 @@ export interface ResponsesState {
 
 // Define the initial state using that type
 const initialState: ResponsesState = {
-    response: "",
+    response: "Hazle una pregunta a la IA",
 };
 
 export const responseSlice = createSlice({

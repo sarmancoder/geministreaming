@@ -12,19 +12,26 @@ import {
     CardHeader,
     CardTitle,
 } from "./ui/card";
+import { useAppDispatch } from "@/store/hooks";
+import { setResponse } from "@/store/responses";
+
+const testPrompt =
+    "Cuales son las peliculas mas adquiridas en la primera semana del mes de julio de 2005";
 
 export function PromptForm() {
+    const dispatch = useAppDispatch();
     return (
         <Form
             onSubmit={async (ev) => {
                 ev.preventDefault();
 
                 const formData = new FormData(ev.target);
-                const data = Object.fromEntries(formData.entries());
+                const data = Object.fromEntries<any>(formData.entries());
 
                 console.log(data);
-                await promptDB(
-                    "Cuales son las peliculas mas adquiridas en la primera semana del mes de julio de 2005",
+                const response = await promptDB(data.prompt);
+                dispatch(
+                    setResponse(response ?? "No se ha obtenido respuesta"),
                 );
             }}
         >
@@ -35,7 +42,7 @@ export function PromptForm() {
                 <CardContent>
                     <Field>
                         <FieldLabel htmlFor="fieldgroup-name">Name</FieldLabel>
-                        <Input name="prompt" />
+                        <Input name="prompt" defaultValue={testPrompt} />
                     </Field>
                 </CardContent>
                 <CardFooter>

@@ -119,6 +119,5 @@ export default async function getAnalyticsFor(userPrompt: string) {
         },
     });
 
-    console.log("\nRespuesta final del asistente:");
-    console.log(finalResponse.text);
+    return finalResponse.text;
 }

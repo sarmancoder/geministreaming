@@ -23,6 +23,12 @@
         "enabled": true,
         "rules": {
             "recommended": true,
+            "correctness": {
+                "noEmptyPattern": "off"
+            },
+            "complexity": {
+                "noBannedTypes":"off"
+            },
             "suspicious": {
                 "noAlert": "error"
             }

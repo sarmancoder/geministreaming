@@ -29,9 +29,28 @@ export function PromptForm() {
                 const data = Object.fromEntries<any>(formData.entries());
 
                 console.log(data);
-                const response = await promptDB(data.prompt);
+                // const response = await promptDB(data.prompt);
+
+                const response = await fetch("/api/prompt", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        // 'Authorization': 'Bearer token'
+                    },
+                    body: JSON.stringify({ prompt: data.prompt }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const dataResponse = await response.json();
+                console.log("data:", dataResponse);
+
                 dispatch(
-                    setResponse(response ?? "No se ha obtenido respuesta"),
+                    setResponse(
+                        dataResponse.data ?? "No se ha obtenido respuesta",
+                    ),
                 );
             }}
         >

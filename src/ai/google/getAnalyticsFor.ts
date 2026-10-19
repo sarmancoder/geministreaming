@@ -3,7 +3,7 @@ import {
     FunctionCallingConfigMode,
     type GenerateContentParameters,
 } from "@google/genai";
-import { ai, toolsDeclaration } from ".";
+import { ai, modelToUse, toolsDeclaration } from ".";
 import { type EnumTool, type IAToolDefinitionGeneric, tools } from "../tools";
 
 export default async function getAnalyticsFor(
@@ -11,7 +11,6 @@ export default async function getAnalyticsFor(
     stream = false,
 ) {
     console.log("getanalytics");
-    const modelToUse = "gemini-3.5-flash-lite"; // Asegúrate de usar un modelo compatible con tools
 
     const response = await ai.models.generateContent({
         model: modelToUse,
@@ -20,10 +19,20 @@ export default async function getAnalyticsFor(
             toolConfig: {
                 functionCallingConfig: {
                     mode: FunctionCallingConfigMode.ANY,
-                    allowedFunctionNames: [toolsDeclaration.getFilms.name],
+                    allowedFunctionNames: [
+                        toolsDeclaration.getFilms.name,
+                        toolsDeclaration.getYearRevenueByMonth.name,
+                    ],
                 },
             },
-            tools: [{ functionDeclarations: [toolsDeclaration.getFilms] }],
+            tools: [
+                {
+                    functionDeclarations: [
+                        toolsDeclaration.getFilms,
+                        toolsDeclaration.getYearRevenueByMonth,
+                    ],
+                },
+            ],
         },
     });
 

@@ -1,38 +1,10 @@
-import { envData } from "@/vars";
 import {
     type Content,
     FunctionCallingConfigMode,
-    type FunctionDeclaration,
     type GenerateContentParameters,
-    GoogleGenAI,
 } from "@google/genai";
-import { type EnumTool, type IAToolDefinitionGeneric, tools } from "./tools";
-
-const toolsDeclaration: Record<
-    EnumTool,
-    FunctionDeclaration & { name: string }
-> = {
-    getFilms: {
-        name: tools.getFilms.name,
-        description: tools.getFilms.description,
-        parametersJsonSchema: {
-            type: "object",
-            properties: {
-                fechaInicio: {
-                    type: "string",
-                    description: "Fecha inicio",
-                },
-                fechaFinal: {
-                    type: "string",
-                    description: "Fecha final",
-                },
-            },
-            required: ["fechaInicio", "fechaFinal"],
-        },
-    },
-};
-
-const ai = new GoogleGenAI({ apiKey: envData.GEMINI_API_KEY });
+import { ai, toolsDeclaration } from ".";
+import { type EnumTool, type IAToolDefinitionGeneric, tools } from "../tools";
 
 export default async function getAnalyticsFor(
     userPrompt: string,

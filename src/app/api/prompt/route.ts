@@ -1,4 +1,4 @@
-import getAnalyticsFor from "@/ai/google";
+import getAnalyticsFor from "@/ai/google/getAnalyticsFor";
 import { GenerateContentResponse } from "@google/genai";
 import { NextResponse } from "next/server";
 

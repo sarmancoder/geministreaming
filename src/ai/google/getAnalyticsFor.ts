@@ -5,16 +5,26 @@ import {
 } from "@google/genai";
 import { ai, modelToUse, toolsDeclaration } from ".";
 import { type EnumTool, type IAToolDefinitionGeneric, tools } from "../tools";
+import type { ChatLine } from "@/types";
 
 export default async function getAnalyticsFor(
     userPrompt: string,
+    lines: ChatLine[] = [],
     stream = false,
 ) {
     console.log("getanalytics");
+    const hystoric = lines.map((msg) => ({
+        role: msg.type === "response" ? "model" : "user",
+        parts: [{ text: msg.content }],
+    }));
 
+    console.log(JSON.stringify(hystoric));
     const response = await ai.models.generateContent({
         model: modelToUse,
-        contents: userPrompt,
+        contents: [
+            ...hystoric,
+            { role: "user", parts: [{ text: userPrompt }] },
+        ],
         config: {
             toolConfig: {
                 functionCallingConfig: {
@@ -75,13 +85,14 @@ export default async function getAnalyticsFor(
         model: modelToUse,
         contents: [
             {
-                role: "model",
+                role: "user",
                 parts: [
                     {
                         text: "Quiero que me respondas en formato markdown, siempre empieza la respuesta por un titulo h1 #, quiero respuestas bonitas",
                     },
                 ],
             },
+            ...hystoric,
             {
                 role: "user",
                 parts: [{ text: userPrompt }],

@@ -6,7 +6,7 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
 
-        const response = await getAnalyticsFor(body.prompt, true);
+        const response = await getAnalyticsFor(body.prompt, body.lines, true);
 
         if (!response) {
             return NextResponse.json({ data: "No response" });

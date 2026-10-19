@@ -18,15 +18,18 @@ import {
     addResponse,
     addToLastResponse,
     addToResponse,
+    selectChatLines,
     setResponse,
 } from "@/store/responses";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 const testPrompt =
     "Cuales son las peliculas mas adquiridas en la primera semana del mes de julio de 2005";
 
 export function PromptForm() {
     const dispatch = useAppDispatch();
+    const lines = useSelector(selectChatLines);
     const [unable, setUnable] = useState(false);
     return (
         <Form
@@ -48,7 +51,14 @@ export function PromptForm() {
                             "Content-Type": "application/json",
                             // 'Authorization': 'Bearer token'
                         },
-                        body: JSON.stringify({ prompt: data.prompt }),
+                        body: JSON.stringify({
+                            prompt: data.prompt,
+                            lines: lines.filter(
+                                (a) =>
+                                    a.type === "question" ||
+                                    a.type === "response",
+                            ),
+                        }),
                     });
 
                     if (!response.ok) {

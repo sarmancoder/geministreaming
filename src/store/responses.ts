@@ -1,11 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from ".";
-
-export type ChatLine = {
-    type: "question" | "response";
-    content: string;
-};
+import type { ChatLine } from "@/types";
 
 // Define a type for the slice state
 export interface ResponsesState {

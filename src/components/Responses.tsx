@@ -1,13 +1,11 @@
 "use client";
 
 import { useAppSelector } from "@/store/hooks";
-import {
-    type ChatLine as ChatLineType,
-    selectChatLines,
-} from "@/store/responses";
+import { selectChatLines } from "@/store/responses";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Bubble, BubbleContent } from "./ui/bubble";
+import type { ChatLine as ChatLineType } from "@/types";
 type ResponsesType = {};
 
 export default function Responses({}: ResponsesType) {

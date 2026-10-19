@@ -1,41 +1,38 @@
-import queryPayments from "@/lib/queryPayments";
 import { envData } from "@/vars";
 import {
-    GoogleGenAI,
+    type Content,
     FunctionCallingConfigMode,
-    FunctionDeclaration,
-    GenerateContentParameters,
+    type FunctionDeclaration,
+    type GenerateContentParameters,
+    GoogleGenAI,
 } from "@google/genai";
+import { type EnumTool, type IAToolDefinitionGeneric, tools } from "./tools";
 
-const GEMINI_API_KEY = envData.GEMINI_API_KEY;
-
-const getFilmsFunctionName = "getFilms";
-
-const getFilmsDeclaration: FunctionDeclaration = {
-    name: getFilmsFunctionName,
-    description: "Conseguir pagos de peliculas de una fecha A a una fecha B",
-    parametersJsonSchema: {
-        type: "object",
-        properties: {
-            fechaInicio: {
-                type: "string",
-                description: "Fecha inicio",
+const toolsDeclaration: Record<
+    EnumTool,
+    FunctionDeclaration & { name: string }
+> = {
+    getFilms: {
+        name: tools.getFilms.name,
+        description: tools.getFilms.description,
+        parametersJsonSchema: {
+            type: "object",
+            properties: {
+                fechaInicio: {
+                    type: "string",
+                    description: "Fecha inicio",
+                },
+                fechaFinal: {
+                    type: "string",
+                    description: "Fecha final",
+                },
             },
-            fechaFinal: {
-                type: "string",
-                description: "Fecha final",
-            },
+            required: ["fechaInicio", "fechaFinal"],
         },
-        required: ["fechaInicio", "fechaFinal"],
     },
 };
 
-async function getFilms(args: any) {
-    console.log("get_films...", args);
-    return await queryPayments(args.fechaInicio, args.fechaFinal);
-}
-
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: envData.GEMINI_API_KEY });
 
 export default async function getAnalyticsFor(
     userPrompt: string,
@@ -51,10 +48,10 @@ export default async function getAnalyticsFor(
             toolConfig: {
                 functionCallingConfig: {
                     mode: FunctionCallingConfigMode.ANY,
-                    allowedFunctionNames: [getFilmsFunctionName],
+                    allowedFunctionNames: [toolsDeclaration.getFilms.name],
                 },
             },
-            tools: [{ functionDeclarations: [getFilmsDeclaration] }],
+            tools: [{ functionDeclarations: [toolsDeclaration.getFilms] }],
         },
     });
 
@@ -66,30 +63,31 @@ export default async function getAnalyticsFor(
         return;
     }
 
-    const call = calls[0];
+    console.log(`Se van a llamar a un total de ${calls.length} funciones`);
 
-    // Early Return 2: Si la función recibida no es la esperada, salimos
-    if (call.name !== getFilmsFunctionName) {
-        console.warn(`Llamada a función no reconocida: ${call.name}`);
-        return;
+    const parts: Content["parts"] = [];
+
+    for (let index = 0; index < calls.length; index++) {
+        const call = calls[index];
+        const tool: IAToolDefinitionGeneric = tools[call.name as EnumTool];
+        if (typeof tool === "undefined") {
+            continue;
+        }
+        console.log(`Ejecutando función ${call.name}`);
+        const functionResult = await tool.execute(call.args);
+        parts.push({
+            functionResponse: {
+                name: call.name,
+                response: {
+                    output: functionResult,
+                },
+            },
+        });
     }
 
-    // --- Flujo Principal Feliz ---
-    console.log(
-        `\nEl modelo solicitó la función: "${call.name}" con args:`,
-        call.args,
-    );
-
-    const parameters = call.args as { fechaInicio: string; fechaFinal: string };
-    console.log("Obteniendo peliculas");
-    const functionResult = await getFilms(parameters);
-
-    // SOLUCIÓN: Usamos el contenido exacto devuelto por el modelo (que incluye la firma interna)
-    // El SDK almacena el bloque de contenido del modelo en `response.functionCalls` o podemos extraerlo de los candidatos.
-    // Una forma limpia en el nuevo SDK es pasar la respuesta del modelo usando su estructura interna:
     const modelTurn = response.candidates?.[0]?.content || {
         role: "model",
-        parts: [{ functionCall: call }],
+        parts: calls.map((call) => ({ functionCall: call })),
     };
 
     const parametersAi: GenerateContentParameters = {
@@ -108,22 +106,10 @@ export default async function getAnalyticsFor(
                 parts: [{ text: userPrompt }],
             },
             modelTurn, // <- Aquí pasamos el turno completo del modelo con su firma intacta
-            {
-                role: "user",
-                parts: [
-                    {
-                        functionResponse: {
-                            name: call.name,
-                            response: {
-                                output: functionResult,
-                            },
-                        },
-                    },
-                ],
-            },
+            { role: "user", parts: parts },
         ],
         config: {
-            tools: [{ functionDeclarations: [getFilmsDeclaration] }],
+            tools: [{ functionDeclarations: [toolsDeclaration.getFilms] }],
         },
     };
 

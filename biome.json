@@ -30,7 +30,8 @@
                 "noBannedTypes":"off"
             },
             "suspicious": {
-                "noAlert": "error"
+                "noAlert": "error",
+                "noExplicitAny":"off"
             }
         },
         "domains": {

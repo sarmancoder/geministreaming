@@ -13,7 +13,13 @@ import {
     CardTitle,
 } from "./ui/card";
 import { useAppDispatch } from "@/store/hooks";
-import { addToResponse, setResponse } from "@/store/responses";
+import {
+    addQuestion,
+    addResponse,
+    addToLastResponse,
+    addToResponse,
+    setResponse,
+} from "@/store/responses";
 import { useState } from "react";
 
 const testPrompt =
@@ -35,7 +41,7 @@ export function PromptForm() {
                 // const response = await promptDB(data.prompt);
 
                 try {
-                    dispatch(setResponse(" > La ia está trabajando..."));
+                    dispatch(addQuestion(data.prompt));
                     const response = await fetch("/api/prompt", {
                         method: "POST",
                         headers: {
@@ -52,7 +58,7 @@ export function PromptForm() {
                     console.dir(response);
 
                     if (response.body instanceof ReadableStream) {
-                        dispatch(setResponse(""));
+                        dispatch(addResponse(""));
                         const reader = response.body.getReader();
                         const decoder = new TextDecoder();
                         while (true) {
@@ -68,7 +74,7 @@ export function PromptForm() {
                                 stream: true,
                             });
                             console.log(chunkText);
-                            dispatch(addToResponse(chunkText));
+                            dispatch(addToLastResponse(chunkText));
                         }
                         setUnable(false);
 

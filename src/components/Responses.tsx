@@ -13,7 +13,7 @@ type ResponsesType = {};
 export default function Responses({}: ResponsesType) {
     const chatLines = useAppSelector(selectChatLines);
     return (
-        <div className="border grow rounded-xl h-70 p-2 w-full flex flex-col gap-2 overflow-auto">
+        <div className="border grow rounded-xl h-70 p-2 w-full max-w-300 mx-auto flex flex-col gap-2 overflow-auto">
             {chatLines.map((item) => (
                 <ChatLine key={item.content} line={item} />
             ))}

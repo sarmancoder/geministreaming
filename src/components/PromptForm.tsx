@@ -1,9 +1,18 @@
 "use client";
 
-import { promptDB } from "@/actions/prompt";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { useAppDispatch } from "@/store/hooks";
+import {
+    addQuestion,
+    addResponse,
+    addToLastResponse,
+    selectChatLines,
+    setResponse,
+} from "@/store/responses";
 import { Form } from "@base-ui/react";
+import { useState } from "react";
+import { useSelector } from "react-redux";
 import { Button } from "./ui/button";
 import {
     Card,
@@ -12,20 +21,9 @@ import {
     CardHeader,
     CardTitle,
 } from "./ui/card";
-import { useAppDispatch } from "@/store/hooks";
-import {
-    addQuestion,
-    addResponse,
-    addToLastResponse,
-    addToResponse,
-    selectChatLines,
-    setResponse,
-} from "@/store/responses";
-import { useState } from "react";
-import { useSelector } from "react-redux";
 
 const testPrompt =
-    "Cuales son las peliculas mas adquiridas en la primera semana del mes de julio de 2005";
+    "Cuales son las peliculas mas adquiridas en el mes de julio de 2020";
 
 export function PromptForm() {
     const dispatch = useAppDispatch();

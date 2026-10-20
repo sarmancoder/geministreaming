@@ -54,6 +54,6 @@ export const modelToUse = "gemini-3.5-flash-lite";
 export const googleFunctions: IAFunctions<
     AsyncGenerator<GenerateContentResponse>
 > = {
-    getAnalyticsFor: getAnalyticsFor,
+    getAnalyticsFor: getAnalyticsFor as any,
     // getRevenueByMonth: getRevenueByMonth,
 };

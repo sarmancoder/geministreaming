@@ -3,7 +3,9 @@
 Aplicación web experimental que conecta Gemini con una base de datos MySQL/MariaDB de muestra. Permite hacer preguntas en lenguaje natural sobre pagos y películas; la IA consulta los datos de Sakila y devuelve respuestas en formato Markdown, transmitidas progresivamente en la interfaz.
 
 ## Demo
-[ver demostración](demo.mp4)
+![Demostración](demo.gif)
+
+[Descargar demostración](demo.mp4)
 
 ## Puesta en marcha
 
